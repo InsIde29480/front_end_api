@@ -7,12 +7,13 @@ body {
     padding: 0;
 }
 
-h1 {
+h1, h2 {
     text-align: center;
     color: #f1f1f1;
     margin-top: 20px;
 }
 
+/* Wrapper pour centrer l'application */
 #app {
     width: 80%;
     max-width: 800px;
@@ -23,14 +24,15 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Séparateurs entre les sections */
+/* Séparateurs gris entre les sections */
 hr {
     border: 0;
-    border-top: 1px solid #444;
-    margin: 20px 0;
+    height: 2px;
+    background: #444;
+    margin: 30px 0;
 }
 
-/* Style pour le bloc d'affichage JSON */
+/* Boîte d'affichage du JSON avec dimensions fixes et scroll */
 pre {
     background-color: #333;
     padding: 20px;
@@ -39,6 +41,9 @@ pre {
     word-wrap: break-word;
     margin-top: 20px;
     font-size: 1.1em;
+    max-height: 300px;  /* Hauteur fixe */
+    overflow-y: auto;   /* Ajout du scroll */
+    border: 1px solid #555; /* Léger contour pour démarquer */
 }
 
 /* Style du bouton */
@@ -50,18 +55,29 @@ button {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
+    display: block;
+    margin: 10px auto;
 }
 
 button:hover {
     background-color: #3700b3;
 }
 
-/* Style pour le champ de fichier */
-input[type="file"] {
-    margin: 20px 0;
+/* Style des champs input */
+input[type="file"], input[type="text"], select {
+    width: calc(100% - 22px);
     padding: 10px;
     background-color: #444;
     color: #ddd;
-    border: none;
+    border: 1px solid #555;
     border-radius: 5px;
+    margin: 10px 0;
+    display: block;
+}
+
+/* Meilleure séparation entre les applications */
+#Parser_etudiant, #Annee_academique {
+    margin-bottom: 50px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #666;
 }
