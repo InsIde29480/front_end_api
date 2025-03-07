@@ -1,256 +1,187 @@
 <template>
+  <div>
+    <!-- Section Gestion des Années Académiques -->
+    <h2>Gestion des Années Académiques</h2>
+
+    <!-- Ajouter une année académique -->
     <div>
-      <!-- Section Années Académiques -->
-      <h2>Ajouter une année académique</h2>
-      <input v-model="nouvelleAnnee" placeholder="Ex: 2025/2026">
-      <button @click="addAnneeAcademique">Ajouter</button>
-  
-      <h2>Liste des années académiques</h2>
-      <ul>
-        <li v-for="annee in annees" :key="annee.id">
-          {{ annee.code }}
-          <button @click="deleteAnneeAcademique(annee.id)">Supprimer</button>
-        </li>
-      </ul>
-  
-      <!-- Section Groupes -->
-      <h2>Ajouter un groupe</h2>
-      <input v-model="nouveauGroupe.nom" placeholder="Nom du groupe">
-      <input v-model="nouveauGroupe.type" placeholder="Type (TP, TD, etc.)">
-      <select v-model="nouveauGroupe.anneeId">
-        <option v-for="annee in annees" :key="annee.id" :value="annee.id">
-          {{ annee.code }}
-        </option>
-      </select>
-      <button @click="addGroupe">Ajouter</button>
-  
-      <h2>Liste des groupes</h2>
-      <ul>
-        <li v-for="groupe in groupes" :key="groupe.id">
-          {{ groupe.nom }} ({{ groupe.type }})
-          <button @click="deleteGroupe(groupe.id)">Supprimer</button>
-        </li>
-      </ul>
-  
-      <!-- Section Unités d'Enseignement -->
-      <h2>Ajouter une unité d'enseignement</h2>
-      <input v-model="nouvelleUnite.nom" placeholder="Nom de l'unité d'enseignement">
-      <select v-model="nouvelleUnite.anneeId">
-        <option v-for="annee in annees" :key="annee.id" :value="annee.id">
-          {{ annee.code }}
-        </option>
-      </select>
-      <button @click="addUnite">Ajouter</button>
-  
-      <h2>Liste des unités d'enseignement</h2>
-      <ul>
-        <li v-for="unite in unites" :key="unite.id">
-          {{ unite.nom }} ({{ unite.annee.code }})
-        </li>
-      </ul>
-  
-      <!-- Section Etudiants -->
-      <h2>Ajouter un étudiant à un groupe</h2>
-      <select v-model="nouveauGroupe.anneeId">
-        <option v-for="annee in annees" :key="annee.id" :value="annee.id">
-          {{ annee.code }}
-        </option>
-      </select>
-      <select v-model="nouveauGroupe.idGroupe">
-        <option v-for="groupe in groupes" :key="groupe.id" :value="groupe.id">
-          {{ groupe.nom }}
-        </option>
-      </select>
-      <input v-model="nouveauGroupe.idEtudiant" placeholder="ID étudiant">
-      <button @click="addEtudiantGroupe">Ajouter Etudiant</button>
-  
-      <p v-if="message">{{ message }}</p>
+      <h3>Ajouter une année académique</h3>
+      <input v-model="anneeAcademicName" placeholder="Nom de l'année académique">
+      <input v-model="startYear" placeholder="Année de début">
+      <input v-model="endYear" placeholder="Année de fin">
+      <button @click="addAnneeAcademic">Ajouter</button>
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        annees: [],
-        nouvelleAnnee: '',
-        groupes: [],
-        nouveauGroupe: { nom: '', type: '', anneeId: null },
-        unites: [],
-        nouvelleUnite: { nom: '', anneeId: null },
-        message: ''
-      };
-    },
-    mounted() {
-      this.getAnneesAcademiques();
-      this.getGroupes();
-      this.getUnites();
-    },
-    methods: {
-      // Années Académiques Methods
-      async getAnneesAcademiques() {
-        try {
-          const response = await fetch('http://localhost:8080/annees-academiques');
-          this.annees = await response.json();
-        } catch (error) {
-          console.error('Erreur lors du chargement:', error);
-        }
-      },
-      async addAnneeAcademique() {
-        if (!this.nouvelleAnnee) {
-          this.message = "Veuillez entrer une année académique.";
-          return;
-        }
-        try {
-          const response = await fetch('http://localhost:8080/annees-academiques', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: this.nouvelleAnnee })
-          });
-          if (response.ok) {
-            this.message = "Année ajoutée avec succès!";
-            this.nouvelleAnnee = '';
-            this.getAnneesAcademiques();
-          } else {
-            this.message = "Erreur lors de l'ajout.";
-          }
-        } catch (error) {
-          console.error('Erreur:', error);
-          this.message = "Erreur de connexion avec l'API.";
-        }
-      },
-      async deleteAnneeAcademique(id) {
-        try {
-          const response = await fetch(`http://localhost:8080/annees-academiques/${id}`, {
-            method: 'DELETE'
-          });
-          if (response.ok) {
-            this.message = "Année supprimée avec succès!";
-            this.getAnneesAcademiques();
-          } else {
-            this.message = "Erreur lors de la suppression.";
-          }
-        } catch (error) {
-          console.error('Erreur:', error);
-          this.message = "Erreur de connexion avec l'API.";
-        }
-      },
-  
-      // Groupes Methods
-      async getGroupes() {
-        try {
-          const response = await fetch('http://localhost:8080/groupes');
-          this.groupes = await response.json();
-        } catch (error) {
-          console.error('Erreur lors du chargement des groupes:', error);
-        }
-      },
-      async addGroupe() {
-        if (!this.nouveauGroupe.nom || !this.nouveauGroupe.type || !this.nouveauGroupe.anneeId) {
-          this.message = "Veuillez remplir tous les champs du groupe.";
-          return;
-        }
-        try {
-          const response = await fetch(`http://localhost:8080/annees-academiques/${this.nouveauGroupe.anneeId}/groupes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nom: this.nouveauGroupe.nom,
-              type: this.nouveauGroupe.type
-            })
-          });
-          if (response.ok) {
-            this.message = "Groupe ajouté avec succès!";
-            this.nouveauGroupe = { nom: '', type: '', anneeId: null };
-            this.getGroupes();
-          } else {
-            this.message = "Erreur lors de l'ajout du groupe.";
-          }
-        } catch (error) {
-          console.error('Erreur:', error);
-          this.message = "Erreur de connexion avec l'API.";
-        }
-      },
-      async deleteGroupe(id) {
-        try {
-          const response = await fetch(`http://localhost:8080/groupes/${id}`, {
-            method: 'DELETE'
-          });
-          if (response.ok) {
-            this.message = "Groupe supprimé avec succès!";
-            this.getGroupes();
-          } else {
-            this.message = "Erreur lors de la suppression.";
-          }
-        } catch (error) {
-          console.error('Erreur:', error);
-          this.message = "Erreur de connexion avec l'API.";
-        }
-      },
-  
-      // Unités d'Enseignement Methods
-      async getUnites() {
-        try {
-          const response = await fetch('http://localhost:8080/unites-enseignement');
-          this.unites = await response.json();
-        } catch (error) {
-          console.error('Erreur lors du chargement des unités d\'enseignement:', error);
-        }
-      },
-      async addUnite() {
-        if (!this.nouvelleUnite.nom || !this.nouvelleUnite.anneeId) {
-          this.message = "Veuillez remplir tous les champs de l'unité d'enseignement.";
-          return;
-        }
-        try {
-          const response = await fetch(`http://localhost:8080/annees-academiques/${this.nouvelleUnite.anneeId}/unites-enseignement`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nom: this.nouvelleUnite.nom
-            })
-          });
-          if (response.ok) {
-            this.message = "Unité d'enseignement ajoutée avec succès!";
-            this.nouvelleUnite = { nom: '', anneeId: null };
-            this.getUnites();
-          } else {
-            this.message = "Erreur lors de l'ajout de l'unité.";
-          }
-        } catch (error) {
-          console.error('Erreur:', error);
-          this.message = "Erreur de connexion avec l'API.";
-        }
-      },
-  
-      // Etudiants Methods
-      async addEtudiantGroupe() {
-        if (!this.nouveauGroupe.idEtudiant || !this.nouveauGroupe.idGroupe) {
-          this.message = "Veuillez entrer l'ID étudiant et le groupe.";
-          return;
-        }
-        try {
-          const response = await fetch(`http://localhost:8080/groupes/${this.nouveauGroupe.idGroupe}/etudiants`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              etudiantId: this.nouveauGroupe.idEtudiant
-            })
-          });
-          if (response.ok) {
-            this.message = "Etudiant ajouté au groupe avec succès!";
-          } else {
-            this.message = "Erreur lors de l'ajout de l'étudiant.";
-          }
-        } catch (error) {
-          console.error('Erreur:', error);
-          this.message = "Erreur de connexion avec l'API.";
-        }
+
+    <!-- Liste des années académiques -->
+    <div>
+      <h3>Années Académiques Existantes</h3>
+      <button @click="fetchAnneeAcademiques">Charger les années académiques</button>
+      <pre v-if="response">{{ response }}</pre>
+        <ul>
+          <li v-for="annee in anneesAcademiques" :key="annee.id">
+            <p><strong>ID :</strong> {{ anneeAcademicName }}</p>
+            <p><strong>Nom :</strong> {{ annee.nom }}</p>
+            <p><strong>Année de début :</strong> {{ annee.debut }}</p>
+            <p><strong>Année de fin :</strong> {{ annee.fin }}</p>
+            <button @click="selectAnneeAcademic(annee.id)">Sélectionner</button>
+            <button @click="deleteAnneeAcademic(annee.id)">Supprimer</button>
+          </li>
+        </ul>
+    </div>
+
+    <!-- Mettre à jour une année académique -->
+    <div v-if="selectedAnneeId">
+      <h3>Mettre à jour une année académique</h3>
+      <input v-model="updateAnneeAcademicName" placeholder="Nouveau nom de l'année académique">
+      <input v-model="updateStartYear" placeholder="Nouvelle année de début">
+      <input v-model="updateEndYear" placeholder="Nouvelle année de fin">
+      <button @click="updateAnneeAcademic">Mettre à jour</button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      anneeAcademicName: '', // Nom de l'année académique à ajouter
+      startYear: '', // Année de début
+      endYear: '', // Année de fin
+      anneesAcademiques: [], // Liste des années académiques
+      selectedAnneeId: null, // ID de l'année académique sélectionnée
+      updateAnneeAcademicName: '', // Nom pour la mise à jour
+      updateStartYear: '', // Année de début pour la mise à jour
+      updateEndYear: '', // Année de fin pour la mise à jour
+      errorMessage: '', // Message d'erreur
+    };
+  },
+  methods: {
+    // Validation des champs
+    validateFields() {
+      if (!this.anneeAcademicName || !this.startYear || !this.endYear) {
+        this.errorMessage = 'Tous les champs (Nom, Année de début et Année de fin) doivent être remplis.';
+        return false;
       }
-    }
-  };
-  </script>
-  
-  <style scoped>
-  /* Add your CSS here */
-  </style>  
+      this.errorMessage = '';
+      return true;
+    },
+
+    // Ajouter une nouvelle année académique
+    async addAnneeAcademic() {
+      if (!this.validateFields()) return;
+
+      const anneeData = {
+        nom: this.anneeAcademicName,
+        debut: this.startYear,
+        fin: this.endYear,
+      };
+
+      try {
+        const response = await fetch('http://localhost:8090/annees-academiques', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(anneeData),
+        });
+
+        if (response.ok) {
+          alert('Année académique ajoutée avec succès');
+          this.anneeAcademicName = '';
+          this.startYear = '';
+          this.endYear = '';
+        } else {
+          throw new Error('Erreur lors de l\'ajout de l\'année académique');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'ajout de l\'année académique');
+      }
+    },
+
+    // Charger la liste des années académiques
+    async fetchAnneeAcademiques() {
+      try {
+        const response = await fetch('http://localhost:8090/annees-academiques');
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);    
+          this.anneesAcademiques = data;
+        } else {
+          throw new Error('Erreur lors du chargement des années académiques');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors du chargement des années académiques');
+      }
+    },
+
+    // Sélectionner une année académique pour la mise à jour
+    selectAnneeAcademic(id) {
+      this.selectedAnneeId = id;
+    },
+
+    // Mettre à jour une année académique
+    async updateAnneeAcademic() {
+      if (!this.selectedAnneeId || !this.updateAnneeAcademicName || !this.updateStartYear || !this.updateEndYear) {
+        alert('Veuillez remplir tous les champs avant de mettre à jour.');
+        return;
+      }
+
+      const updatedData = {
+        nom: this.updateAnneeAcademicName,
+        debut: this.updateStartYear,
+        fin: this.updateEndYear,
+      };
+
+      try {
+        const response = await fetch(`http://localhost:8090/annees-academiques/${this.selectedAnneeId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedData),
+        });
+
+        if (response.ok) {
+          alert('Année académique mise à jour');
+          this.selectedAnneeId = null;
+          this.updateAnneeAcademicName = '';
+          this.updateStartYear = '';
+          this.updateEndYear = '';
+          this.fetchAnneeAcademiques(); // Rafraîchir la liste
+        } else {
+          throw new Error('Erreur lors de la mise à jour de l\'année académique');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la mise à jour de l\'année académique');
+      }
+    },
+
+    // Supprimer une année académique
+    async deleteAnneeAcademic(id) {
+      try {
+        const response = await fetch(`http://localhost:8090/annees-academiques/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          alert('Année académique supprimée');
+          this.fetchAnneeAcademiques(); // Rafraîchir la liste
+        } else {
+          throw new Error('Erreur lors de la suppression de l\'année académique');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la suppression de l\'année académique');
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+.error-message {
+  color: red;
+  font-size: 14px;
+}
+</style>
